@@ -11,6 +11,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     private Triangle mTriangle;
     private Square   mSquare;
+    private Line   mLine;
     // vPMatrix is an abbreviation for "Model View Projection Matrix"
     private final float[] vPMatrix = new float[16];
     private final float[] projectionMatrix = new float[16];
@@ -28,6 +29,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         mTriangle = new Triangle();
         // initialize a square
         mSquare = new Square();
+        mLine = new Line();
     }
 
 
@@ -71,7 +73,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // Draw shape
        // mTriangle.draw(vPMatrix);
 
-        mSquare.draw(scratch);
+        //mSquare.draw(scratch);
+        mLine.draw(scratch);
 
     }
 
