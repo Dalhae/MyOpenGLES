@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
+import java.util.ArrayList;
 import java.util.Random;
 
 public class Line {
@@ -26,12 +27,12 @@ public class Line {
     // number of coordinates per vertex in this array
     static final int COORDS_PER_VERTEX = 3;
     static float[] lineCoords;
-    private CreateXY lineXY;
+    private LineCoordinates lineXY;
 
-    private short[] drawOrder = new short[300]; // order to draw vertices
+    private short[] drawOrder; // order to draw vertices
 
     // Set color with red, green, blue and alpha (opacity) values
-    float color[] = { 0.63671875f, 0.76953125f, 0.22265625f, 1.0f };
+    float color[] = { 1.0f, 0.76953125f, 0.22265625f, 1.0f };
 
     /*private final String vertexShaderCode =
           "attribute vec4 vPosition;" +
@@ -58,12 +59,18 @@ public class Line {
                     "}";
 
     public Line() {
-        lineXY = new CreateXY(300);
-        lineCoords = lineXY.arrXYZ;
+        lineXY = new LineCoordinates();
+        lineXY.addLine((float)0.2,(float)0.2,(float)0.2,(float)1.8);
+        lineXY.addLine((float)0.2,(float)0.2,(float)1.8,(float)0.2);
+   //     lineXY.addLine((float)0.3,(float)0.3,(float)1,(float)1);
+        lineCoords = lineXY.getCoordinates();
         vertexCount = lineCoords.length / COORDS_PER_VERTEX;
-        for(short i=0; i<300;i++) {
-            drawOrder[i]=i;
-        }
+        int len = lineCoords.length;
+        drawOrder = new short[]{0,1,2,3};
+       // drawOrder = new short[len];
+        //for(short i=0; i<len;i++) {
+        //    drawOrder[i]=i;
+       // }
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect(
                 // (# of coordinate values * 4 bytes per float)
@@ -132,46 +139,74 @@ public class Line {
 
         // Draw the triangle
         // GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
-        GLES20.glDrawElements(GLES20.GL_LINES, drawOrder.length, GLES20.GL_UNSIGNED_SHORT,drawListBuffer);
+        GLES20.glDrawElements(GLES20.GL_POINTS, drawOrder.length, GLES20.GL_UNSIGNED_SHORT,drawListBuffer);
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(positionHandle);
     }
 
 }
 
-class CreateXY{
-    Random rnd;
-    float[] arrXYZ;
-    float buf;
-    CreateXY(){
-        rnd = new Random(1);
-        arrXYZ = new float[1000];
-        for(int i=0 ; i<1000; i+=3){
-            buf = rnd.nextFloat();
-            arrXYZ[i] = (float) (buf/0.1);
-            arrXYZ[i+1] = (float)(buf%0.1);
-            arrXYZ[i+2] =(float) 0.0;
-        }
+class LineCoordinates{
+    private ArrayList<Float> mCoordinates;
+    private float[] arrCoordinates;
+
+    LineCoordinates(){
+        mCoordinates = new ArrayList<Float>();
+     }
+
+    LineCoordinates(float startx, float starty, float endx, float endy){
+        mCoordinates = new ArrayList<Float>();
+       addLine(startx, starty, endx, endy);
     }
 
-    CreateXY(int count){
-        rnd = new Random(1);
-        int len = count * 3;
-        arrXYZ = new float[len];
-        for(int i=0 ; i<len; i+=3){
-            buf = rnd.nextFloat();
-            arrXYZ[i] = (float) (buf*2-1);
-            buf = rnd.nextFloat();
-            arrXYZ[i+1] = (float)(buf*2-1);
-            arrXYZ[i+2] =(float) 0.0;
+    public float[] getCoordinates(){
+        int len = length();
+        if (len > 0){
+            arrCoordinates = new float[len];
+            for(int i=0;i<len;i++){
+                arrCoordinates[i] = mCoordinates.get(i);
+            }
         }
-    }
-
-    public float[] getData(){
-        return arrXYZ;
+        return arrCoordinates;
     }
 
     public int length(){
-        return arrXYZ.length;
+        return  mCoordinates.size();
+    }
+
+    public void addLine(float startx, float starty, float endx, float endy){
+        Point start, end;
+        start = GetCoordinates(startx,starty);
+        end = GetCoordinates(endx,endy);
+        mCoordinates.add(start.point[0]);
+        mCoordinates.add(start.point[1]);
+        mCoordinates.add(start.point[2]);
+        mCoordinates.add(end.point[0]);
+        mCoordinates.add(end.point[1]);
+        mCoordinates.add(end.point[2]);
+    }
+
+    public float[] GetCoordinatesLine(Point start, Point end){
+        float buf[]={start.point[0],start.point[1],end.point[0],end.point[1]};
+        return buf;
+    }
+
+    public Point GetCoordinates(float xRatio, float yRatio){
+        float x,y,z;
+        x=xRatio-(float)1;
+        y=yRatio-(float)1;
+        z=(float)0.0;
+        return new Point(x,y,z);
+    }
+
+    class Point{
+        public float[] point;
+        Point(float x, float y, float z){
+            point = new float[3];
+            point[0] = x;
+            point[1] = y;
+            point[2] = z;
+        }
     }
 }
+
