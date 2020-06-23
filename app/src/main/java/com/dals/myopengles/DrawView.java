@@ -18,6 +18,8 @@ public class DrawView extends View {
     private Rect rect;
     private float rhight, rwidth;
     private float[] lines;
+    float zerox = (float)100;
+    float zeroy = (float)900;
 
     public DrawView(Context context){
         super(context);
@@ -42,12 +44,21 @@ public class DrawView extends View {
 
         paint.setAntiAlias(true);
         paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(5);
+        paint.setStrokeWidth(3);
+        paint.setColor(getResources().getColor(R.color.colorGrayLine1));
 
         Path path = new Path();
         path.moveTo(rwidth*100,rhight*100);
         path.lineTo(rwidth*100,rhight*900);
         path.lineTo(rwidth*900,rhight*900);
+        path.moveTo(rwidth*100,rhight*100);
+        path.lineTo(rwidth*100-10,rhight*100);
+        path.moveTo(rwidth*100,rhight*((800/2)+100));
+        path.lineTo(rwidth*100-10,rhight*((800/2)+100));
+        path.moveTo(rwidth*100,rhight*((800*(float)3.0/(float)4.0)+100));
+        path.lineTo(rwidth*100-10,rhight*((800*(float)3.0/(float)4.0)+100));
+        path.moveTo(rwidth*100,rhight*((800*(float)1.0/(float)4.0)+100));
+        path.lineTo(rwidth*100-10,rhight*((800*(float)1.0/(float)4.0)+100));
         canvas.drawPath(path,paint);
     }
 
@@ -56,5 +67,30 @@ public class DrawView extends View {
         mwidth = width;
         rhight = (float)mhight/(float)1000;
         rwidth = (float)mwidth/(float)1000;
+    }
+
+    public void makeGraphPath(Path path, float[] xpoint, float[] ypoint){
+        int len;
+        if(xpoint.length>ypoint.length){
+            len = ypoint.length;
+        } else { len = xpoint.length;}
+
+        path.moveTo(rwidth * (zerox + xpoint[0]),rhight*(zeroy-ypoint[0]));
+        for(int i=1;i<len;i++) {
+            path.lineTo(rwidth * (zerox + xpoint[i]),rhight*(zeroy-ypoint[i]));
+        }
+    }
+
+    private float scale(float x, float xmin, float xmax, float ymin, float ymax){
+        return ((x*(ymax-ymin))/(xmax-xmin));
+    }
+
+    private float[] scaleArr(float[] x, float xmin, float xmax, float ymin, float ymax){
+        int len = x.length;
+        float[] y = new float[len];
+        for(int i=0;i<len;i++){
+            y[i] = scale(x[i],xmin,xmax,ymin,ymax);
+        }
+        return y;
     }
 }
